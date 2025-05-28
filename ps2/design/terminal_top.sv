@@ -38,7 +38,8 @@ asynchronous_fifo #(
     .full(full)    
 );
 
-logic[PASSWORD_WIDTH-1:0][7:0] password = { 4'h2c, 4'h24, 4'h1B, 4'h2c };
+; DW'('h24)
+logic[PASSWORD_WIDTH-1:0][7:0] password = { 8'h2c, 8'h24, 8'h1B, 8'h2c };
 terminal_logic terminal_logic (
     .rst_n(rst_n),
     .clk(sys_clk),
