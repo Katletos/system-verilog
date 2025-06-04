@@ -38,39 +38,13 @@ asynchronous_fifo #(
     .full(full)    
 );
 
-; DW'('h24)
+
 logic[PASSWORD_WIDTH-1:0][7:0] password = { 8'h2c, 8'h24, 8'h1B, 8'h2c };
-terminal_logic terminal_logic (
+password_checker pc(
     .rst_n(rst_n),
     .clk(sys_clk),
     .empty(empty),
     .code(data_out),
     .password(password)
 );   
-endmodule
-
-module terminal_logic #(parameter PASSWORD_WIDTH = 4) (
-    input  logic clk, rst_n, empty,
-    input  logic[7:0] code,
-    input  logic[PASSWORD_WIDTH-1:0][7:0] password,
-    output logic[PASSWORD_WIDTH-1:0] leds
-);
-
-typedef enum { FIRST, SECOND, THIRD, FOURTH } state;
-state st;
-
-always_ff @(posedge clk)
-    if (~rst_n) begin 
-        st <= FIRST;
-        leds <= {PASSWORD_WIDTH{1'b0}};
-    end else begin
-        if (!empty) begin 
-            unique case (st)
-                FIRST:  begin if (password[0] == code) st <= SECOND; leds[0] = 1; end
-                SECOND: begin if (password[1] == code) st <= THIRD;  leds[1] = 1; end
-                THIRD:  begin if (password[2] == code) st <= FOURTH; leds[2] = 1; end
-                FOURTH: begin if (password[3] == code) st <= FIRST;  leds[3] = 1; end
-            endcase       
-        end
-    end
 endmodule
