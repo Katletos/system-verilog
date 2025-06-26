@@ -23,6 +23,8 @@ initial begin
     data <= 0;
     rst_n <= 0;
     @(posedge clk)
+    rst_n <= 1;
+    @(posedge clk)
     
     generate_keypress(
         .packed_data(packed_data)

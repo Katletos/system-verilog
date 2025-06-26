@@ -1,4 +1,4 @@
-module asynchronous_fifo #(parameter DEPTH=8, DATA_WIDTH=8) (
+module asynchronous_fifo #(parameter DEPTH=1, DATA_WIDTH=8) (
   input wclk, wrst_n,
   input rclk, rrst_n,
   input w_en, r_en,
@@ -52,13 +52,13 @@ module fifo_mem #(parameter DEPTH=8, DATA_WIDTH=8, PTR_WIDTH=3) (
       fifo[b_wptr[PTR_WIDTH-1:0]] <= data_in;
     end
   end
-  
+  /*
   always@(posedge rclk) begin
     if(r_en & !empty) begin
       data_out <= fifo[b_rptr[PTR_WIDTH-1:0]];
     end
   end
-  
+  */
   assign data_out = fifo[b_rptr[PTR_WIDTH-1:0]];
 endmodule
 

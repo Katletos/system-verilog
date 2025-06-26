@@ -1,6 +1,6 @@
 module ps2_keyboard_decoder(
     input  logic clk, data, rst_n,
-    output logic[6:0] code,
+    output logic[7:0] code,
     output logic done
 );
 
@@ -13,11 +13,12 @@ state st;
 
 always_ff @(posedge clk, negedge rst_n) begin
     if (~rst_n) begin 
+        done <= 0;
         st <= START;
         code <= 7'b0;
     end else begin
         unique case (st)
-            START:  if(data == -1) begin done <= 0; st <= DATA0; end
+            START:  if(data == 0) begin done <= 0; st <= DATA0; end
             DATA0:  begin code[0] <= data; st <= DATA1;  end
             DATA1:  begin code[1] <= data; st <= DATA2;  end
             DATA2:  begin code[2] <= data; st <= DATA3;  end
@@ -27,7 +28,7 @@ always_ff @(posedge clk, negedge rst_n) begin
             DATA6:  begin code[6] <= data; st <= DATA7;  end
             DATA7:  begin code[7] <= data; st <= PARITY; end
             PARITY: st <= ~^code == data ? STOP : START;    
-            STOP:   if (data == 0) begin done <= 1; st <= START; end
+            STOP:   if (data == 1) begin done <= 1; st <= START; end
         endcase
     end
 end

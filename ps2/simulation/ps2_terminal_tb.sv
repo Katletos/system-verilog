@@ -22,18 +22,27 @@ initial begin
 end
 
 initial begin
+    leds <= 'b0000;
     clk <= 0;
     forever #10 clk = ~clk;
 end
 
-logic[7:0] packed_data = 'b1010_1010;
 initial begin
+    
+    rst_n <= 0;
+    @(posedge clk);
     rst_n <= 1;
     @(posedge clk);
 
     generate_keypress(
-        .packed_data(packed_data)
+        .packed_data(8'h2c)
     );
+//    generate_keypress(
+//        .packed_data(8'h3c)
+//    );
+//    generate_keypress(
+//        .packed_data(8'h24)
+//    );
     
     #500;
 end

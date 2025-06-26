@@ -23,7 +23,7 @@ ps2_keyboard_decoder keyboard_decoder(
 logic full, empty;
 logic [7:0] data_out;
 asynchronous_fifo #(
-    .DEPTH(PASSWORD_WIDTH),
+    .DEPTH(8),
     .DATA_WIDTH(8)
 ) fifoinst (
     .w_en(done_decoding),
@@ -45,6 +45,7 @@ password_checker pc(
     .clk(sys_clk),
     .empty(empty),
     .code(data_out),
-    .password(password)
+    .password(password),
+    .leds(leds)
 );   
 endmodule

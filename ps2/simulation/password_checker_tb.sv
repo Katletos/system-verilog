@@ -10,6 +10,7 @@ localparam PASSWORD_WIDTH = 4;
 localparam T = 8'h2c;
 localparam E = 8'h24;
 localparam S = 8'h1B;
+localparam R = 8'h3c;
 
 logic[PASSWORD_WIDTH-1:0][7:0] password = { T, E, S, T};
 logic[PASSWORD_WIDTH-1:0] leds;
@@ -31,6 +32,9 @@ initial begin
 end
 
 initial begin
+    @(posedge clk);
+    code <= R;
+    assert (leds == 4'b0000);
     @(posedge clk);
     code <= T;
     assert (leds == 4'b1000);
