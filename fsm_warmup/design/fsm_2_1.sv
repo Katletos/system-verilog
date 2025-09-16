@@ -1,27 +1,29 @@
-module fsm_2_1(
+module fsm_2_1 (
     output logic z,
-    input logic clk, rst_n, x
+    input  logic clk,
+    rst_n,
+    x
 );
 
-typedef enum {
+  typedef enum {
     INVERT,
     COPY
-} fsm_state;
-fsm_state state;
+  } fsm_state_e;
+  fsm_state_e state;
 
 
-always_ff @(posedge clk, negedge rst_n)
-    if (rst_n) begin 
-        state <= COPY;
-        z <= 0;
-    end else begin 
-        unique case (state)
-            COPY   : begin
-                state <= x ? INVERT : COPY;
-                z <= x;
-            end
-            INVERT : z <= ~x;
-        endcase
+  always_ff @(posedge clk, negedge rst_n)
+    if (rst_n) begin
+      state <= COPY;
+      z <= 0;
+    end else begin
+      unique case (state)
+        COPY: begin
+          state <= x ? INVERT : COPY;
+          z <= x;
+        end
+        INVERT: z <= ~x;
+      endcase
     end
 
 endmodule

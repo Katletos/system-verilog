@@ -1,25 +1,27 @@
-module fsm_2_2(
+module fsm_2_2 (
     output logic z,
-    input logic clk, rst_n, x
+    input  logic clk,
+    rst_n,
+    x
 );
 
-typedef enum {
+  typedef enum {
     INVERT,
     COPY
-} fsm_state;
-fsm_state state;
+  } fsm_state_e;
+  fsm_state_e state;
 
-always_comb
-    if (rst_n) begin 
-        state  <= COPY;
-        z      <= 0;
-    end else begin 
-        unique case (state)
-            COPY   : begin
-                state <= x ? INVERT : COPY;
-                z <= x;
-            end
-            INVERT : z = ~x;
-        endcase
+  always_comb
+    if (rst_n) begin
+      state = COPY;
+      z     = 0;
+    end else begin
+      unique case (state)
+        COPY: begin
+          state = x ? INVERT : COPY;
+          z = x;
+        end
+        INVERT: z = ~x;
+      endcase
     end
 endmodule
