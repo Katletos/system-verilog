@@ -5,42 +5,42 @@ module cordic #(
 ) (
     input logic clk,
     input logic rst_n,
-    input logic signed [POINT_WIDTH] x_in,
-    input logic signed [POINT_WIDTH] y_in,
-    input logic signed [ANGLE_WIDTH] z_in,
+    input logic signed [POINT_WIDTH-1:0] x_in,
+    input logic signed [POINT_WIDTH-1:0] y_in,
+    input logic signed [ANGLE_WIDTH-1:0] z_in,
     input logic start,
-    output logic signed [POINT_WIDTH] x_out,
-    output logic signed [POINT_WIDTH] y_out,
-    output logic signed [ANGLE_WIDTH] z_out,
+    output logic signed [POINT_WIDTH-1:0] x_out,
+    output logic signed [POINT_WIDTH-1:0] y_out,
+    output logic signed [ANGLE_WIDTH-1:0] z_out,
     output logic done
 );
 
   // types
   localparam real PI = 3.141592653589793;
-  typedef enum logic {
-    IDLE,
-    COMPUTE,
-    DONE
+  typedef enum logic [2:0] {
+    IDLE = 0,
+    COMPUTE = 1,
+    DONE = 2
   } state_e;
   state_e state;
 
   // local variables
-  logic signed [POINT_WIDTH][ITERATIONS] x_reg;
-  logic signed [POINT_WIDTH][ITERATIONS] y_reg;
-  logic signed [ANGLE_WIDTH][ITERATIONS] z_reg;
-  logic signed [ANGLE_WIDTH][ITERATIONS] z_reg;
-  logic [$clog2(ITERATIONS)] iteration;
-  logic signed [ANGLE_WIDTH] current_z;
-  logic signed [ANGLE_WIDTH-1:0] arctan_table[ITERATIONS];
+  logic signed [POINT_WIDTH-1:0][ITERATIONS-1:0] x_reg;
+  logic signed [POINT_WIDTH-1:0][ITERATIONS-1:0] y_reg;
+  logic signed [ANGLE_WIDTH-1:0][ITERATIONS-1:0] z_reg;
+  logic [$clog2(ITERATIONS)-1:0] iteration;
+  logic signed [ANGLE_WIDTH-1:0] current_z;
+  logic signed [ANGLE_WIDTH-1:0][ITERATIONS-1:0] arctan_table;
   initial begin
     for (int i = 0; i < ITERATIONS; i++) begin
-      arctan_table[i] = $rtoi($atan(2.0 ** (-i)) * (2.0 ** (ANGLE_WIDTH - 2)) / PI);
+      arctan_table[i] = ANGLE_WIDTH'($rtoi($atan(2.0 ** (-i)) * (2.0 ** (ANGLE_WIDTH - 2)) / PI));
     end
   end
+  logic [1:0] quadrant;
 
   always_ff @(posedge clk, negedge rst_n) begin
     if (!rst_n) begin
-      current_state <= IDLE;
+      state <= IDLE;
       done <= 0;
       iteration <= '0;
       current_z <= '0;
@@ -50,6 +50,7 @@ module cordic #(
       x_out <= '0;
       y_out <= '0;
       z_out <= '0;
+      quadrant <= '0;
     end else begin
 
       unique case (state)
@@ -57,9 +58,7 @@ module cordic #(
           if (start) begin
             current_z <= '0;
 
-            logic [1:0] quadrant;
-            quadrant <= angle[31:30];
-
+            quadrant  <= z_in[ANGLE_WIDTH-1:ANGLE_WIDTH-2];
             unique case (quadrant)
               // no changes needed for these quadrants
               2'b00, 2'b11: begin
@@ -71,14 +70,14 @@ module cordic #(
               2'b01: begin
                 x_reg[0] <= -y_in;
                 y_reg[0] <= x_in;
-                z_reg[0] <= {2'b00, z_in[ANGLE_WIDTH-2:0]};
+                z_reg[0] <= {2'b00, z_in[ANGLE_WIDTH-3:0]};
               end
               // add pi/2 to angles in this quadrant
               2'b10: begin
                 x_reg[0] <= y_in;
                 y_reg[0] <= -x_in;
                 z_reg[0] <= z_in;
-                z_reg[0] <= {2'b11, z_in[ANGLE_WIDTH-2:0]};
+                z_reg[0] <= {2'b11, z_in[ANGLE_WIDTH-3:0]};
               end
             endcase
 
@@ -91,11 +90,11 @@ module cordic #(
           if (direction) begin
             x_reg[iteration+1] <= x_reg[iteration] + (y_reg[iteration] >>> iteration);
             y_reg[iteration+1] <= y_reg[iteration] - (x_reg[iteration] >>> iteration);
-            angle_reg[iteration+1] <= angle_reg[iteration] + arctan_table[iteration];
+            z_reg[iteration+1] <= z_reg[iteration] + arctan_table[iteration];
           end else begin
             x_reg[iteration+1] <= x_reg[iteration] - (y_reg[iteration] >>> iteration);
             y_reg[iteration+1] <= y_reg[iteration] + (x_reg[iteration] >>> iteration);
-            angle_reg[iteration+1] <= angle_reg[iteration] - arctan_table[iteration];
+            z_reg[iteration+1] <= z_reg[iteration] - arctan_table[iteration];
           end
 
           iteration <= iteration + 1;

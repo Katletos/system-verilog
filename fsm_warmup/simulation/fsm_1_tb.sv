@@ -1,24 +1,23 @@
-module fsm_1_tb();
+module fsm_1_tb ();
 
+  logic clk;
+  logic A;
+  logic B;
+  logic Q;
+  logic reset;
 
-logic clk;
-logic A;
-logic B;
-logic Q;
-logic reset;
+  fsm_1 dut (.*);
 
-fsm_1 dut (.*);
-
-initial begin 
+  initial begin
     clk <= 0;
-    A <= 0;
-    B <= 0;
-    Q <= 0;
-    
-    forever #10 clk = ~clk;
-end
+    A   <= 0;
+    B   <= 0;
+    Q   <= 0;
 
-initial begin 
+    forever #10 clk = ~clk;
+  end
+
+  initial begin
     reset <= 0;
     #15;
     @(posedge clk);
@@ -33,6 +32,6 @@ initial begin
     B <= 1;
     @(posedge clk);
     B <= 1;
-end
+  end
 
 endmodule
